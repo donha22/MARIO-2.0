@@ -4,10 +4,8 @@ const pipe = document.querySelector('.pipe');
 const startScreen = document.querySelector('.start');
 const gameOverScreen = document.querySelector('.game-over');
 const deathCounter = document.querySelector('.death-counter');
-
 const restartButton = document.querySelector('.restart-button');
 const startButton = document.querySelector('.button-start');
-
 const distanceCounter = document.querySelector('.distance-counter');
 
 let deaths = 0;
@@ -27,7 +25,7 @@ const updateDistance = () => {
 
 const startGame = () => {
     pipe.classList.add('pipe-animation');
-    startScreen.style.display = 'none';
+    startScreen.style.display = 'none'; // Esconde a tela de início
 
     audioStart.play();
     loopInterval = setInterval(loop, 10);
@@ -37,27 +35,28 @@ const startGame = () => {
 };
 
 const restartGame = () => {
-    gameOverScreen.style.display = 'none';
+    gameOverScreen.style.display = 'none'; // Esconde a tela de game over
+    startScreen.style.display = 'flex'; // Mostra a tela de início novamente
+    
+    // Reseta a posição do cano
     pipe.style.left = '';
     pipe.style.right = '0';
+    pipe.classList.remove('pipe-animation');
+    
+    // Reseta o Mario
     mario.src = './src/img/mario.gif';
     mario.style.width = '150px';
     mario.style.bottom = '0';
+    mario.style.marginLeft = '0px';
 
     audioGameOver.pause();
     audioGameOver.currentTime = 0;
 
-    audioStart.play();
+    audioStart.pause();
     audioStart.currentTime = 0;
-
-    deaths = 0;
-    deathCounter.textContent = `Mortes: ${deaths}`;
 
     distance = 0;
     distanceCounter.textContent = `Distância: ${distance}m | Máxima: ${maxDistance}m`;
-
-    loopInterval = setInterval(loop, 10);
-    distanceInterval = setInterval(updateDistance, 100);
 };
 
 const jump = () => {
