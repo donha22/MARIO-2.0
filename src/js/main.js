@@ -1,15 +1,29 @@
 const mario = document.querySelector('.mario');
 const pipe = document.querySelector('.pipe');
+
 const startScreen = document.querySelector('.start');
 const gameOverScreen = document.querySelector('.game-over');
-const deathCounter = document.querySelector('.death-counter'); // Seletor para o contador
-const restartButton = document.querySelector('.restart-button'); // Seletor para o botão de reinício
+const deathCounter = document.querySelector('.death-counter');
 
-let deaths = 0; // Variável para a contagem de mortes
+const restartButton = document.querySelector('.restart-button');
+const startButton = document.querySelector('.button-start');
+
+const distanceCounter = document.querySelector('.distance-counter');
+
+let deaths = 0;
 let loopInterval;
 
-audioStart = new Audio('./src/audio/audio_theme.mp3');
-audioGameOver = new Audio('./src/audio/audio_gameover.mp3');
+let distance = 0;
+let maxDistance = localStorage.getItem('maxDistance') ? parseInt(localStorage.getItem('maxDistance')) : 0;
+let distanceInterval;
+
+const audioStart = new Audio('./src/audio/audio_theme.mp3');
+const audioGameOver = new Audio('./src/audio/audio_gameover.mp3');
+
+const updateDistance = () => {
+    distance += 1;
+    distanceCounter.textContent = `Distância: ${distance}m | Máxima: ${maxDistance}m`;
+};
 
 const startGame = () => {
     pipe.classList.add('pipe-animation');
@@ -17,6 +31,9 @@ const startGame = () => {
 
     audioStart.play();
     loopInterval = setInterval(loop, 10);
+    
+    distance = 0;
+    distanceInterval = setInterval(updateDistance, 100);
 };
 
 const restartGame = () => {
@@ -33,10 +50,14 @@ const restartGame = () => {
     audioStart.play();
     audioStart.currentTime = 0;
 
-    deaths = 0; // Reseta a contagem
+    deaths = 0;
     deathCounter.textContent = `Mortes: ${deaths}`;
 
+    distance = 0;
+    distanceCounter.textContent = `Distância: ${distance}m | Máxima: ${maxDistance}m`;
+
     loopInterval = setInterval(loop, 10);
+    distanceInterval = setInterval(updateDistance, 100);
 };
 
 const jump = () => {
@@ -52,8 +73,8 @@ const loop = () => {
     const marioPosition = parseFloat(window.getComputedStyle(mario).bottom);
 
     if (pipePosition <= 120 && pipePosition > 0 && marioPosition < 80) {
-        // Lógica para quando o Mario bate no cano
-        clearInterval(loopInterval); // Para o loop
+        clearInterval(loopInterval);
+        clearInterval(distanceInterval); // Para de contar a distância
         
         pipe.classList.remove('pipe-animation');
         pipe.style.left = `${pipePosition}px`;
@@ -69,8 +90,15 @@ const loop = () => {
         
         gameOverScreen.style.display = 'flex';
         
-        deaths++; // Incrementa o contador de mortes
-        deathCounter.textContent = `Mortes: ${deaths}`; // Atualiza o texto na tela
+        deaths++;
+        deathCounter.textContent = `Mortes: ${deaths}`;
+        
+        // Verifica e salva a distância máxima
+        if (distance > maxDistance) {
+            maxDistance = distance;
+            localStorage.setItem('maxDistance', maxDistance);
+        }
+        distanceCounter.textContent = `Distância: ${distance}m | Máxima: ${maxDistance}m`;
     }
 };
 
@@ -86,6 +114,8 @@ document.addEventListener('touchstart', e => {
     }
 });
 
-// Event listeners para os botões de Iniciar e Reiniciar
-startScreen.addEventListener('click', startGame);
+startButton.addEventListener('click', startGame);
 restartButton.addEventListener('click', restartGame);
+
+// Atualiza a distância máxima inicial ao carregar a página
+distanceCounter.textContent = `Distância: ${distance}m | Máxima: ${maxDistance}m`;
